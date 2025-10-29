@@ -2,6 +2,7 @@ package main
 
 import (
 	"debug/buildinfo"
+	"flag"
 	"io/fs"
 	"log"
 	"os"
@@ -12,20 +13,27 @@ import (
 )
 
 func main() {
-	run()
+	run(parseFlags())
 }
 
-func run() {
+func parseFlags() (verbose bool, release bool) {
+	flag.BoolVar(&verbose, "verbose", false, "enable verbose output")
+	flag.BoolVar(&release, "release", false, "install in release mode (-ldflags=\"-s -w\")")
+	flag.Parse()
+	return verbose, release
+}
+
+func run(verbose, release bool) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatalf("Failed to load user's home directory: %v", err)
 	}
 
 	gobin := filepath.Join(home, "go", "bin")
-	updateBinariesAt(gobin)
+	updateBinariesAt(gobin, verbose, release)
 }
 
-func updateBinariesAt(path string) {
+func updateBinariesAt(path string, verbose, release bool) {
 	err := os.Chdir(path)
 	if err != nil {
 		log.Fatalf("Failed to change directory to %s: %v", path, err)
@@ -43,7 +51,7 @@ func updateBinariesAt(path string) {
 				return nil
 			}
 
-			return installLatestVersionOf(binary)
+			return installLatestVersionOf(binary, verbose, release)
 		})
 	}
 
@@ -52,7 +60,7 @@ func updateBinariesAt(path string) {
 	}
 }
 
-func installLatestVersionOf(binary fs.DirEntry) error {
+func installLatestVersionOf(binary fs.DirEntry, verbose, release bool) error {
 	name := binary.Name()
 	info, err := buildinfo.ReadFile(name)
 	if err != nil {
@@ -60,6 +68,15 @@ func installLatestVersionOf(binary fs.DirEntry) error {
 		return err
 	}
 
-	cmd := exec.Command("go", "install", info.Path+"@latest")
+	var ldflags string
+	if release {
+		ldflags = "-s -w"
+	}
+
+	cmd := exec.Command("go", "install", "-ldflags", ldflags, info.Path+"@latest")
+	if verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	return cmd.Run()
 }
