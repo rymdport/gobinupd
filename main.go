@@ -12,18 +12,26 @@ import (
 )
 
 func main() {
+	run()
+}
+
+func run() {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatalf("Failed to load user's home directory: %v", err)
 	}
 
 	gobin := filepath.Join(home, "go", "bin")
-	err = os.Chdir(gobin)
+	updateBinariesAt(gobin)
+}
+
+func updateBinariesAt(path string) {
+	err := os.Chdir(path)
 	if err != nil {
-		log.Fatalf("Failed to change directory to %s: %v", gobin, err)
+		log.Fatalf("Failed to change directory to %s: %v", path, err)
 	}
 
-	binaries, err := os.ReadDir(gobin)
+	binaries, err := os.ReadDir(path)
 	if err != nil {
 		log.Fatalf("Failed to read directory: %v", err)
 	}
