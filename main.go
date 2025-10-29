@@ -73,7 +73,7 @@ func installLatestVersionOf(binary fs.DirEntry, verbose, release bool) error {
 		ldflags = "-s -w"
 	}
 
-	cmd := exec.Command("go", "install", "-ldflags", ldflags, info.Path+"@latest")
+	cmd := exec.Command("go", "install", "-ldflags", ldflags, info.Path+"@latest") //#nosec Variables are safe.
 	if verbose {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
