@@ -1,5 +1,6 @@
 # gobinupd
 A tool to update installed tools in the `go/bin` folder.
+It updates all your tools in parallel to speed up the update process.
 
 ## Install
 
@@ -12,5 +13,8 @@ go install github.com/rymdport/gobinupd@latest
 ## Usage
 
 Simply run `gobinupd` to automatically update all installed tools.
-- Optionally, pass `--release` to build without debug information for smaller binaries.
-- Optionally, pass `--verbose` to print more information about the update process.
+No path needs to be specified.
+
+**Flags:**
+- Pass `--release` to build without debug information for smaller binaries.
+- Pass `--verbose` to print more information about the update process.
