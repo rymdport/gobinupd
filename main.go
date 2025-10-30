@@ -15,29 +15,36 @@ func main() {
 	run(parseFlags())
 }
 
-func parseFlags() (verbose bool, release bool) {
-	flag.BoolVar(&verbose, "verbose", false, "enable verbose output")
-	flag.BoolVar(&verbose, "v", false, "")
-	flag.BoolVar(&release, "release", false, "install in release mode (-ldflags=\"-s -w\")")
-	flag.BoolVar(&release, "r", false, "")
+func parseFlags() (set flags) {
+	flag.BoolVar(&set.verbose, "verbose", false, "enable verbose output")
+	flag.BoolVar(&set.verbose, "v", false, "")
+	flag.BoolVar(&set.release, "release", false, "install in release mode (-ldflags=\"-s -w\")")
+	flag.BoolVar(&set.release, "r", false, "")
+	flag.BoolVar(&set.noUpdate, "no-update", false, "no update, only rebuild")
+	flag.BoolVar(&set.noUpdate, "n", false, "")
 	flag.Parse()
-	return verbose, release
+	return set
 }
 
-func run(verbose, release bool) {
+type flags struct {
+	verbose  bool
+	release  bool
+	noUpdate bool
+}
+
+func run(set flags) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatalf("Failed to load user's home directory: %v", err)
 	}
 
 	gobin := filepath.Join(home, "go", "bin")
-	updater := updater{verbose: verbose, release: release}
+	updater := updater{options: set}
 	updater.updateBinariesAt(gobin)
 }
 
 type updater struct {
-	verbose bool
-	release bool
+	options flags
 }
 
 func (u *updater) updateBinariesAt(path string) {
@@ -74,13 +81,18 @@ func (u *updater) installLatestVersionOf(name string) error {
 		return err
 	}
 
-	var ldflags string
-	if u.release {
+	ldflags := ""
+	if u.options.release {
 		ldflags = "-s -w"
 	}
 
-	cmd := exec.Command("go", "install", "-ldflags", ldflags, info.Path+"@latest") //#nosec Variables are safe.
-	if u.verbose {
+	version := "@latest"
+	if u.options.noUpdate {
+		version = "@" + info.Main.Version
+	}
+
+	cmd := exec.Command("go", "install", "-ldflags", ldflags, info.Path+version) //#nosec Variables are safe.
+	if u.options.verbose {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
