@@ -24,3 +24,4 @@ No path needs to be specified.
 **Flags:**
 - Pass `--release` (or `-r`) to build without debug information for smaller binaries.
 - Pass `--verbose` (or `-v`) to print more information about the update process.
+- Pass `--no-update` (or `-n`) to rebuild all tools without updating them.
