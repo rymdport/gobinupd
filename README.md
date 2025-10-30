@@ -22,5 +22,5 @@ Simply run `gobinupd` to automatically update all installed tools.
 No path needs to be specified.
 
 **Flags:**
-- Pass `--release` to build without debug information for smaller binaries.
-- Pass `--verbose` to print more information about the update process.
+- Pass `--release` (or `-r`) to build without debug information for smaller binaries.
+- Pass `--verbose` (or `-v`) to print more information about the update process.

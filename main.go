@@ -3,7 +3,6 @@ package main
 import (
 	"debug/buildinfo"
 	"flag"
-	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -18,7 +17,9 @@ func main() {
 
 func parseFlags() (verbose bool, release bool) {
 	flag.BoolVar(&verbose, "verbose", false, "enable verbose output")
+	flag.BoolVar(&verbose, "v", false, "")
 	flag.BoolVar(&release, "release", false, "install in release mode (-ldflags=\"-s -w\")")
+	flag.BoolVar(&release, "r", false, "")
 	flag.Parse()
 	return verbose, release
 }
@@ -30,10 +31,16 @@ func run(verbose, release bool) {
 	}
 
 	gobin := filepath.Join(home, "go", "bin")
-	updateBinariesAt(gobin, verbose, release)
+	updater := updater{verbose: verbose, release: release}
+	updater.updateBinariesAt(gobin)
 }
 
-func updateBinariesAt(path string, verbose, release bool) {
+type updater struct {
+	verbose bool
+	release bool
+}
+
+func (u *updater) updateBinariesAt(path string) {
 	err := os.Chdir(path)
 	if err != nil {
 		log.Fatalf("Failed to change directory to %s: %v", path, err)
@@ -51,7 +58,7 @@ func updateBinariesAt(path string, verbose, release bool) {
 				return nil
 			}
 
-			return installLatestVersionOf(binary, verbose, release)
+			return u.installLatestVersionOf(binary.Name())
 		})
 	}
 
@@ -60,8 +67,7 @@ func updateBinariesAt(path string, verbose, release bool) {
 	}
 }
 
-func installLatestVersionOf(binary fs.DirEntry, verbose, release bool) error {
-	name := binary.Name()
+func (u *updater) installLatestVersionOf(name string) error {
 	info, err := buildinfo.ReadFile(name)
 	if err != nil {
 		log.Printf("Failed to read build info for %s: %v", name, err)
@@ -69,12 +75,12 @@ func installLatestVersionOf(binary fs.DirEntry, verbose, release bool) error {
 	}
 
 	var ldflags string
-	if release {
+	if u.release {
 		ldflags = "-s -w"
 	}
 
 	cmd := exec.Command("go", "install", "-ldflags", ldflags, info.Path+"@latest") //#nosec Variables are safe.
-	if verbose {
+	if u.verbose {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
