@@ -8,10 +8,14 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/rymdport/easypgo"
 	"golang.org/x/sync/errgroup"
 )
 
 func main() {
+	stop := easypgo.Generate()
+	defer stop()
+
 	run(parseFlags())
 }
 

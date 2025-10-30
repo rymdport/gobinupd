@@ -1,2 +1,4 @@
+github.com/rymdport/easypgo v0.1.0 h1:NeYjETd7GjlOQLWvlxIKOdI0KCf1Df5gp+hwgJnu9to=
+github.com/rymdport/easypgo v0.1.0/go.mod h1:0LmEdrWsq61pdod/BC/h0BV3+UIB+jbN6F7SbJ7xyYs=
 golang.org/x/sync v0.17.0 h1:l60nONMj9l5drqw6jlhIELNv9I0A4OFgRsG9k2oT9Ug=
 golang.org/x/sync v0.17.0/go.mod h1:9KTHXmSnoGruLpwFjVSX0lNNA75CykiMECbovNTZqGI=
