@@ -43,21 +43,17 @@ func run(set flags) {
 	}
 
 	gobin := filepath.Join(home, "go", "bin")
-	updater := updater{options: set}
-	updater.updateBinariesAt(gobin)
+	updater := updater{options: set, path: gobin}
+	updater.updateBinaries()
 }
 
 type updater struct {
 	options flags
+	path    string
 }
 
-func (u *updater) updateBinariesAt(path string) {
-	err := os.Chdir(path)
-	if err != nil {
-		log.Fatalf("Failed to change directory to %s: %v", path, err)
-	}
-
-	binaries, err := os.ReadDir(path)
+func (u *updater) updateBinaries() {
+	binaries, err := os.ReadDir(u.path)
 	if err != nil {
 		log.Fatalf("Failed to read directory: %v", err)
 	}
@@ -69,7 +65,7 @@ func (u *updater) updateBinariesAt(path string) {
 				return nil
 			}
 
-			return u.installLatestVersionOf(binary.Name())
+			return u.installLatestVersionOf(filepath.Join(u.path, binary.Name()))
 		})
 	}
 
